@@ -12,6 +12,8 @@ import { MessagesScreen } from './MessagesScreen';
 const Tab = createMaterialBottomTabNavigator();
 const HomeStack = createStackNavigator();
 const NotificationsStack = createStackNavigator();
+const ProfileStack = createStackNavigator();
+const MessagesStack = createStackNavigator();
 
 const MainTabScreen = () => {
     return (
@@ -33,7 +35,7 @@ const MainTabScreen = () => {
         />
         <Tab.Screen
           name="Profile"
-          component={ProfileScreen}
+          component={ProfileStackScreen}
           options={{
             tabBarLabel: "Profile",
             tabBarColor: "#08f065",
@@ -55,7 +57,7 @@ const MainTabScreen = () => {
         />
         <Tab.Screen
           name="Message"
-          component={MessagesScreen}
+          component={MessagesStackScreen}
           options={{
             tabBarLabel: "Messages",
             tabBarColor: "#f008e8",
@@ -138,4 +140,76 @@ const NotificationsStackScreen = ({ navigation }) => (
       }}
     />
   </NotificationsStack.Navigator>
+);
+
+const MessagesStackScreen = ({ navigation }) => (
+  <MessagesStack.Navigator
+    screenOptions={{
+      headerStyle: {
+        backgroundColor: "#f008e8",
+      },
+      headerTintColor: "#fff",
+      headerTitleStyle: {
+        fontWeight: "bold",
+      },
+    }}
+  >
+    <MessagesStack.Screen
+      name="Messages"
+      component={MessagesScreen}
+      options={{
+        title: "Messages",
+        //     <Image
+        //         source = {require('../images/logoFullDark.png')}
+        //         style={{width:'3%',height: 20, margin: '10%'}}
+        // />,
+        headerLeft: () => (
+          <Icon.Button
+            name="ios-menu"
+            size={25}
+            backgroundColor="#f008e8"
+            onPress={() => {
+              navigation.openDrawer();
+            }}
+          />
+        ),
+      }}
+    />
+  </MessagesStack.Navigator>
+);
+
+const ProfileStackScreen = ({ navigation }) => (
+  <ProfileStack.Navigator
+    screenOptions={{
+      headerStyle: {
+        backgroundColor: "#08f065",
+      },
+      headerTintColor: "#fff",
+      headerTitleStyle: {
+        fontWeight: "bold",
+      },
+    }}
+  >
+    <ProfileStack.Screen
+      name="Profile"
+      component={ProfileScreen}
+      options={{
+        title: "Profile",
+        //     <Image
+        //         source = {require('../images/logoFullDark.png')}
+        //         style={{width:'3%',height: 20, margin: '10%'}}
+        // />,
+        headerLeft: () => (
+          <Icon.Button
+            name="ios-menu"
+            size={25}
+            backgroundColor="#08f065"
+            onPress={() => {
+              navigation.openDrawer();
+            }}
+          />
+        ),
+      }}
+    />
+  </ProfileStack.Navigator>
 );

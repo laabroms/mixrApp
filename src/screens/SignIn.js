@@ -62,6 +62,10 @@ export function SignInScreen({ navigation }) {
         });
     }
     
+    const loginHandle = (email, password) => {
+      signIn(email, password);
+    }
+
     return (
       <View style={styles.container}>
         <View style={styles.top}>
@@ -127,7 +131,7 @@ export function SignInScreen({ navigation }) {
             <TouchableOpacity
               style={styles.signIn}
               onPress={() => {
-                signIn()
+                loginHandle( data.email, data.password)
               }}
             >
               <Text style={styles.textSign}>Sign In</Text>
