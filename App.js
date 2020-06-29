@@ -4,10 +4,16 @@ import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer, DrawerActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { HomeScreen } from './src/screens/Home';
-import { RootStackScreen } from './src/navigators/RootStackScreen'; 
+import { HomeScreen } from './src/screens/HomeScreen';
+import { DetailsScreen } from "./src/screens/NotificationsScreen";
+import { SettingsScreen } from './src/screens/SettingsScreen';
+import { BookmarkScreen } from "./src/screens/BookmarkScreen";
+import { SupportScreen } from "./src/screens/SupportScreen";
 
+import { RootStackScreen } from './src/navigators/RootStackScreen'; 
+import { DrawerContent } from './src/screens/DrawerContent';
 import { AuthContext } from './src/components/context';
+import MainTabScreen from './src/screens/MainTabScreen';
 // import * as firebase from 'firebase';
 
 
@@ -68,14 +74,18 @@ export default function App() {
   return (
     <AuthContext.Provider value={authContext}>
       <NavigationContainer>
-        { userToken != null ? (
-          <Drawer.Navigator>
-            <Drawer.Screen name="home" component={HomeScreen} />
+        {userToken != null ? (
+          <Drawer.Navigator
+            drawerContent={(props) => <DrawerContent {...props} />}
+          >
+            <Drawer.Screen name="HomeDrawer" component={MainTabScreen} />
+            <Drawer.Screen name="SupportScreen" component={SupportScreen} />
+            <Drawer.Screen name="SettingsScreen" component={SettingsScreen} />
+            <Drawer.Screen name="BookmarkScreen" component={BookmarkScreen} />
           </Drawer.Navigator>
+        ) : (
+          <RootStackScreen />
         )}
-
-
-        <RootStackScreen />
       </NavigationContainer>
     </AuthContext.Provider>
   );
