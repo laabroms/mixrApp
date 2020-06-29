@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import { ImageLoader } from '../components/ImageLoader';
+import * as Animatable from "react-native-animatable";
 
 
 
@@ -26,7 +27,8 @@ export function LoadingScreen({navigation}) {
                 />
             </View>
        
-            <View style={styles.bottom}>
+            <Animatable.View animation='bounceInUp' style={styles.bottom}>
+                
                 <TouchableOpacity 
                     style={styles.signUp}
                     onPress={() => navigation.navigate('SignUp')}
@@ -46,7 +48,7 @@ export function LoadingScreen({navigation}) {
                 </TouchableOpacity>
                 
 
-            </View>
+            </Animatable.View>
 
         </View>
 

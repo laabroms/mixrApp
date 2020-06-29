@@ -1,14 +1,14 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { Component, useState, useEffect } from 'react';
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 
-import { NavigationContainer } from '@react-navigation/native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { NavigationContainer, DrawerActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { LoadingScreen } from './src/screens/LoadingScreen';
-import { SignIn } from './src/screens/SignIn';
-import { SignUp } from './src/screens/SignUp';
-// import * as firebase from 'firebase';
+import { HomeScreen } from './src/screens/Home';
+import { RootStackScreen } from './src/navigators/RootStackScreen'; 
 
+import { AuthContext } from './src/components/context';
+// import * as firebase from 'firebase';
 
 
 // var firebaseConfig = {
@@ -23,42 +23,61 @@ import { SignUp } from './src/screens/SignUp';
 // };
 
 
-// firebase.initializeApp(firebaseConfig);
+// if (!firebase.apps.length) {firebase.initializeApp(firebaseConfig); }
 
+const Drawer = createDrawerNavigator();
 
-const Stack = createStackNavigator();
 
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [userToken, setUserToken] = useState(null);
+
+  const authContext = React.useMemo(() => ({
+    signIn: () => {
+      setUserToken('fgkj');
+      setIsLoading(false);
+    },
+    signOut: () => {
+      setUserToken(null);
+      setIsLoading(false);
+    },
+    signUp: () => {
+      setUserToken('fgkj');
+      setIsLoading(false);
+    },
+  }));
 
 
+  useEffect(()=> {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+  }, []);
+
+
+  if ( isLoading ) {
+    return (
+      <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
+        <ActivityIndicator size='large' />
+      </View>
+    );
+  }
 
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        mode={'modal'}
-        screenOptions={{
-          headerShown: false
-        }}>
-        <Stack.Screen
-
-          name="LoadingScreen"
-          component={LoadingScreen}
-        />
-
-        <Stack.Screen
-          name="SignIn"
-          component={SignIn}
-        />
-        <Stack.Screen
-          name="SignUp"
-          component={SignUp}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <AuthContext.Provider value={authContext}>
+      <NavigationContainer>
+        { userToken != null ? (
+          <Drawer.Navigator>
+            <Drawer.Screen name="home" component={HomeScreen} />
+          </Drawer.Navigator>
+        )}
 
 
+        <RootStackScreen />
+      </NavigationContainer>
+    </AuthContext.Provider>
   );
 
 }

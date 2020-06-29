@@ -11,65 +11,142 @@ import {
     Image,
 } from 'react-native';
 
-import { Header } from '../components/Header';
+import Icon from "react-native-vector-icons/AntDesign";
+
 import { IconButton } from '../components/IconButton';
-import { Input } from '../components/Input';
+import * as Animatable from 'react-native-animatable';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Feather from "react-native-vector-icons/Feather";
 
+import { AuthContext } from '../components/context';
 
-export function SignIn({ navigation }) {
+export function SignInScreen({ navigation }) {
+    
+    const [data, setData] = React.useState({
+        email: '',
+        password: '',
+        check_textInputChange: false,
+        secureTextEntry: true
+    });
+    
+    const { signIn } = React.useContext(AuthContext);
+
+    const textInputChange = (val) => {
+        if (val.length != 0 ) {
+            setData({
+                ...data,
+                email:val,
+                check_textInputChange: true
+            });
+        }
+        else {
+            setData({
+             ...data,
+                email:val,
+                check_textInputChange: false
+             });
+        }
+    }
+
+    const handlePasswordChange = (val) => {
+        setData({
+            ...data,
+            password: val
+        });
+    }
+
+    const updateSecureTextEntry = () => {
+        setData({
+            ...data,
+            secureTextEntry: !data.secureTextEntry
+        });
+    }
+    
     return (
-        <View style={styles.container}>
-
-            <IconButton
-                style={styles.icon}
-                name={'closecircleo'}
-                onPress={() => {
-                    // navigation.pop();
-                    navigation.navigate('LoadingScreen')
-                }}
-            />
-
-            <View style={styles.top}>
-               
-            </View>
-
-            <View style={styles.bottom}>
-                <Header style={styles.header}>Sign In</Header>
-                <TextInput 
-                    style={styles.input}
-                    placeholder='Email'
-                    keyboardType={'email-address'}
-                    autoCapitalize='none'
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder='Password'
-                    autoCapitalize='none'
-                    secureTextEntry
-                />
-                <TouchableOpacity
-                    style={styles.signUp}
-                >
-                    <Text style={styles.signUpText}>
-                        SIGN IN
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.newUser}
-                    onPress={() => navigation.navigate('SignUp')}
-                >
-                    <Text style={styles.newUserText}>
-                        New to Mixr? Click here to sign up
-                    </Text>
-                </TouchableOpacity>
-
-
-            </View>
-
+      <View style={styles.container}>
+        <View style={styles.top}>
+          <IconButton
+            style={styles.icon}
+            name={"closecircleo"}
+            onPress={() => {
+              navigation.navigate("LoadingScreen");
+            }}
+          />
+          <Text style={styles.text_header}>Welcome!</Text>
         </View>
 
-    )
+        <Animatable.View animation="fadeInUpBig" style={styles.bottom}>
+          <Text style={styles.text_footer}>Email</Text>
+          <View style={styles.action}>
+            <FontAwesome
+              name="user-o"
+              color="#fff"
+              size={20}
+              style={{ paddingBottom: 5 }}
+            />
+            <TextInput
+              placeholder="Your Email"
+              style={styles.textInput}
+              autoCapitalize="none"
+              placeholderTextColor="#DDDDDD"
+              onChangeText={(val) => textInputChange(val)}
+            />
+            {data.check_textInputChange ? (
+              <Animatable.View animation="bounceIn">
+                <Feather name="check-circle" color="white" size={20} />
+              </Animatable.View>
+            ) : null}
+          </View>
+
+          <Text style={[styles.text_footer, { marginTop: 35 }]}>Password</Text>
+          <View style={styles.action}>
+            <FontAwesome
+              name="lock"
+              color="#fff"
+              size={20}
+              style={{ paddingBottom: 5 }}
+            />
+            <TextInput
+              placeholder="Your Password"
+              style={styles.textInput}
+              autoCapitalize="none"
+              placeholderTextColor="#DDDDDD"
+              secureTextEntry={data.secureTextEntry ? true : false}
+              onChangeText={(val) => handlePasswordChange(val)}
+            />
+            <TouchableOpacity onPress={updateSecureTextEntry}>
+              {data.secureTextEntry ? (
+                <Feather name="eye-off" color="white" size={20} />
+              ) : (
+                <Feather name="eye" color="white" size={20} />
+              )}
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.button}>
+            <TouchableOpacity
+              style={styles.signIn}
+              onPress={() => {
+                signIn()
+              }}
+            >
+              <Text style={styles.textSign}>Sign In</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.buttonNew}>
+            <TouchableOpacity
+              style={styles.signUp}
+              onPress={() => {
+                navigation.navigate('SignUp')
+              }}
+            >
+              <Text style={styles.textSignNew}>New to Mixr? Sign up here!</Text>
+            </TouchableOpacity>
+          </View>
+        </Animatable.View>
+      </View>
+    );
 
 
 
@@ -77,86 +154,90 @@ export function SignIn({ navigation }) {
 
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        // alignItems:'center',
-        backgroundColor: '#fff'
-    },
-    top: {
-        height: '25%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: '10%',
-        marginRight: '10%'
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  top: {
+    flex: 1,
+    // alignItems: "center",
+    justifyContent: "flex-end",
+    paddingHorizontal: 20,
+    paddingBottom: 50,
+  },
 
-    },
-    input: {
-        width: '100%',
-        padding: 12,
-        borderRadius: 50,
-        backgroundColor: '#e8e8e8',
-        color: '#f03e08',
-        fontWeight: 'bold',
-        fontSize: 18,
-        marginBottom: 20
-    },
-    bottom: {
-        height: '75%',
-        alignItems: 'center',
-        marginLeft: '10%',
-        marginRight: '10%',
-    },
-    signUp: {
-        backgroundColor: '#f03e08',
-        width: '100%',
-        padding: 18,
-        borderRadius: 50,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 20
-    },
-    header: {
-        marginBottom: '10%'
-    },
-    signUpText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 18,
-    },
-    signIn: {
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 18,
-        borderRadius: 50,
-        borderWidth: 1,
-        borderColor: '#f03e08'
-    },
-    signInText: {
-        color: '#f03e08',
-        fontWeight: 'bold',
-        fontSize: 18,
-    },
-    icon: {
-        position: 'absolute',
-        top: 60,
-        right: 16,
+  bottom: {
+    flex: 3,
+    backgroundColor: "#f03e08",
+    // alignItems: "center",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+  },
+  text_header: {
+    color: "black",
+    fontWeight: "bold",
+    fontSize: 30,
+  },
+  text_footer: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
 
-
-    },
-    newUser: {
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 18,
-        borderRadius: 50,
-    },
-    newUserText: {
-        color: '#f03e08',
-        fontWeight: '500',
-        fontSize: 14,
-    }
-
-
+  icon: {
+    position: "absolute",
+    top: 50,
+    right: 16,
+  },
+  action: {
+    flexDirection: "row",
+    marginTop: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#fff",
+    paddingBottom: 5,
+  },
+  textInput: {
+    flex: 1,
+    marginTop: Platform.OS === "ios" ? 0 : -12,
+    paddingLeft: 10,
+    color: "#fff",
+  },
+  button: {
+    alignItems: "center",
+    marginTop: 50,
+  },
+  buttonNew: {
+    alignItems: "center",
+    marginTop: 20,
+  },
+  signIn: {
+    width: "100%",
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 25,
+    borderColor: "#fff",
+    borderWidth: 1,
+  },
+  signUp: {
+    width: "100%",
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 15,
+    // borderColor: "#fff",
+    // borderWidth: 1,
+  },
+  textSign: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  textSignNew: {
+    fontSize: 15,
+    // fontWeight: "bold",
+    color: "#fff",
+  },
 });
