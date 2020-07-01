@@ -44,7 +44,7 @@ export function DrawerContent(props) {
               <View style={styles.row}>
                 <View style={styles.section}>
                   <Paragraph style={[styles.paragraph, styles.caption]}>
-                    1.3M
+                    214M
                   </Paragraph>
                   <Caption style={styles.caption}>Followers</Caption>
                 </View>

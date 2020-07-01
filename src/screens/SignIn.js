@@ -5,14 +5,12 @@ import {
     View,
     TextInput,
     TouchableOpacity,
-    StatusBar,
-    Button,
-    ActivityIndicator,
-    Image,
+    Alert
+    
 } from 'react-native';
 
 import Icon from "react-native-vector-icons/AntDesign";
-
+import  Users  from '../model/users';
 import { IconButton } from '../components/IconButton';
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -26,7 +24,9 @@ export function SignInScreen({ navigation }) {
         email: '',
         password: '',
         check_textInputChange: false,
-        secureTextEntry: true
+        secureTextEntry: true,
+        isValidEmail: true,
+        isValidPassword: true
     });
     
     const { signIn } = React.useContext(AuthContext);
@@ -36,23 +36,34 @@ export function SignInScreen({ navigation }) {
             setData({
                 ...data,
                 email:val,
-                check_textInputChange: true
+                check_textInputChange: true,
+                isValidEmail: true
             });
         }
         else {
             setData({
-             ...data,
-                email:val,
-                check_textInputChange: false
-             });
+              ...data,
+              email: val,
+              check_textInputChange: false,
+              isValidEmail: false,
+            });
         }
     }
 
     const handlePasswordChange = (val) => {
-        setData({
+      if ( val.trim().length >= 8)  {
+      setData({
             ...data,
-            password: val
+            password: val,
+            isValidPassword: true
         });
+      } else {
+        setData({
+          ...data,
+          password: val,
+          isValidPassword: false,
+        });
+      }
     }
 
     const updateSecureTextEntry = () => {
@@ -61,9 +72,38 @@ export function SignInScreen({ navigation }) {
             secureTextEntry: !data.secureTextEntry
         });
     }
+
+    // const handleValidEmail = (val) => {
+    //     if( val.trim().length >= 4) {
+    //       setData({
+    //         ...data,
+    //         isValidEmail: true
+    //       });
+    //     } else {
+    //       setData({
+    //         ...data,
+    //         isValidEmail: false,
+    //       });
+    //     }
+    // }
     
     const loginHandle = (email, password) => {
-      signIn(email, password);
+      const foundUser = Users.filter(( item ) => {
+        return email == item.email && password == item.password;
+      });
+      if (data.email.length == 0 || data.password.length == 0 ) {
+        Alert.alert("Wrong Input!", "Email or password field cannot be empty.", [
+          { text: "Okay" }
+        ]);
+        return;
+      } 
+      if ( foundUser.length == 0 ) {
+        Alert.alert('Invalid User!', 'Email or password is incorrect.', [
+          {text: 'Okay'}
+        ]);
+        return;
+      } 
+      signIn(foundUser);
     }
 
     return (
@@ -76,7 +116,13 @@ export function SignInScreen({ navigation }) {
               navigation.navigate("LoadingScreen");
             }}
           />
-          <Text style={styles.text_header}>Welcome!</Text>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={styles.text_header}>Welcome to Mixr!</Text>
+            {/* <Image  
+            source={require('../images/logoFullDark.png')}
+            style={{width:50, height: 10}}
+            /> */}
+          </View>
         </View>
 
         <Animatable.View animation="fadeInUpBig" style={styles.bottom}>
@@ -94,6 +140,7 @@ export function SignInScreen({ navigation }) {
               autoCapitalize="none"
               placeholderTextColor="#DDDDDD"
               onChangeText={(val) => textInputChange(val)}
+              // onEndEditing={(e)=>handleValidEmail(e.nativeEvent.text)}
             />
             {data.check_textInputChange ? (
               <Animatable.View animation="bounceIn">
@@ -101,6 +148,13 @@ export function SignInScreen({ navigation }) {
               </Animatable.View>
             ) : null}
           </View>
+          {data.isValidEmail ? null : (
+            <Animatable.View animation="fadeInLeft" duration={500}>
+              <Text style={styles.errorMsg}>
+                Email must be valid.
+              </Text>
+            </Animatable.View>
+          )}
 
           <Text style={[styles.text_footer, { marginTop: 35 }]}>Password</Text>
           <View style={styles.action}>
@@ -126,12 +180,20 @@ export function SignInScreen({ navigation }) {
               )}
             </TouchableOpacity>
           </View>
+          {data.isValidPassword ? null : (
+            <Animatable.View animation="fadeInLeft" duration={500}>
+              <Text style={styles.errorMsg}>
+                Password must be at least 8 characters long.
+              </Text>
+            </Animatable.View>
+          )}
+          
 
           <View style={styles.button}>
             <TouchableOpacity
               style={styles.signIn}
               onPress={() => {
-                loginHandle( data.email, data.password)
+                loginHandle(data.email, data.password);
               }}
             >
               <Text style={styles.textSign}>Sign In</Text>
@@ -142,7 +204,7 @@ export function SignInScreen({ navigation }) {
             <TouchableOpacity
               style={styles.signUp}
               onPress={() => {
-                navigation.navigate('SignUp')
+                navigation.navigate("SignUp");
               }}
             >
               <Text style={styles.textSignNew}>New to Mixr? Sign up here!</Text>
@@ -244,4 +306,9 @@ const styles = StyleSheet.create({
     // fontWeight: "bold",
     color: "#fff",
   },
+  errorMsg: {
+    color:'red',
+    fontWeight:'bold',
+    paddingTop:2
+  }
 });
