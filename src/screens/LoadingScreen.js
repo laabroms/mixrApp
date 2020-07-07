@@ -10,19 +10,23 @@ import {
     ActivityIndicator,
     Image,
 } from 'react-native';
-
+import { useTheme } from '@react-navigation/native';
 import { ImageLoader } from '../components/ImageLoader';
 import * as Animatable from "react-native-animatable";
 
 
 
 export function LoadingScreen({navigation}) {
+
+    const { colors } = useTheme();
+    const theme = useTheme();
+
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: colors.background} ]}>
        
             <View style={styles.top}>
                 <ImageLoader 
-                    source={require('../images/logoFullDark.png')}
+                    source={theme.dark ? require('../images/logoFullLight.png') : require('../images/logoFullDark.png')}
                     style={styles.logo}
                 />
             </View>

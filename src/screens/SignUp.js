@@ -5,60 +5,86 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  StatusBar,
-  Button,
-  ActivityIndicator,
-  Image,
+  
 } from "react-native";
 
-import Icon from "react-native-vector-icons/AntDesign";
+import { useTheme } from "@react-navigation/native";
+
 
 import { IconButton } from "../components/IconButton";
 import * as Animatable from "react-native-animatable";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Feather from "react-native-vector-icons/Feather";
+import * as firebase from "firebase";
 
 import { AuthContext } from "../components/context";
+import AsyncStorage from "@react-native-community/async-storage";
 
 
 export function SignUp({ navigation }) {
+  
+  const { colors } = useTheme();
+
+  
   const [data, setData] = React.useState({
     email: "",
     password: "",
+    confirmPassword: '',
     check_textInputChange: false,
     secureTextEntry: true,
     confirm_secureTextEntry: true,
+    passMatch: true,
+    isValidPassword: true,
+    isValidEmail: true,
+    errorMessage: '',
   });
 
+  const { signUp } = React.useContext(AuthContext);
+
+
   const textInputChange = (val) => {
-    if (val.length != 0) {
+     var emailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+     if (emailFormat.test(val)) {
+       setData({
+         ...data,
+         email: val,
+         check_textInputChange: true,
+         isValidEmail: true
+       });
+     } else {
+       setData({
+         ...data,
+         email: val,
+         check_textInputChange: false,
+         isValidEmail: false
+       });
+     }
+  };
+
+  const handlePasswordChange = (val) => {
+    if (val.trim().length >= 8) {
       setData({
         ...data,
-        email: val,
-        check_textInputChange: true,
+        password: val,
+        isValidPassword: true
       });
     } else {
       setData({
         ...data,
-        email: val,
-        check_textInputChange: false,
+        password: val,
+        isValidPassword: false,
       });
     }
-  };
-
-  const handlePasswordChange = (val) => {
-    setData({
-      ...data,
-      password: val,
-    });
-  };
+  }
 
   const handleConfirmPasswordChange = (val) => {
-    setData({
-      ...data,
-      password: val,
-    });
-  };
+      setData({
+        ...data,
+        confirmPassword: val,
+      });
+    }
+    
+  
 
   const updateSecureTextEntry = () => {
     setData({
@@ -74,6 +100,40 @@ export function SignUp({ navigation }) {
      });
    };
 
+   const checkPassMatch = (val) => {
+    if (data.password !== data.confirmPassword) {
+      setData({
+        ...data,
+        passMatch: false,
+      });
+    } else{
+      setData({
+        ...data,
+        passMatch: true,
+      })
+    }
+   }
+   
+
+  const registerHandle = (email, password) => {
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(email, password)
+      .catch(function (error) {
+        setData({
+          ...data,
+          errorMessage: error.message,
+        });
+      })
+
+    signUp(email)
+
+
+    
+  }
+
+
+  
 
   return (
     <View style={styles.container}>
@@ -85,90 +145,114 @@ export function SignUp({ navigation }) {
             navigation.navigate("LoadingScreen");
           }}
         />
-        <Text style={styles.text_header}>Register Now!</Text>
+        <Text style={[styles.text_header, {color:colors.background}]}>Register Now!</Text>
       </View>
 
-      <Animatable.View animation="fadeInUpBig" style={styles.bottom}>
-        <Text style={styles.text_footer}>Email</Text>
+      <Animatable.View animation="fadeInUpBig" style={[styles.bottom, {backgroundColor:colors.background}]}>
+        <Text style={[styles.text_footer, {color:colors.text}]}>Email</Text>
         <View style={styles.action}>
           <FontAwesome
             name="user-o"
-            color="#fff"
+            color={colors.text}
             size={20}
             style={{ paddingBottom: 5 }}
           />
           <TextInput
             placeholder="Your Email"
-            style={styles.textInput}
+            style={[styles.textInput, {color:colors.text}]}
             autoCapitalize="none"
-            placeholderTextColor="#DDDDDD"
+            placeholderTextColor="#787878"
             onChangeText={(val) => textInputChange(val)}
           />
           {data.check_textInputChange ? (
             <Animatable.View animation="bounceIn">
-              <Feather name="check-circle" color="white" size={20} />
+              <Feather name="check-circle" color="#1bf723" size={20} />
             </Animatable.View>
           ) : null}
         </View>
+        {data.isValidEmail ? null : (
+          <Animatable.View animation="fadeInLeft" duration={500}>
+            <Text style={styles.errorMsg}>Email must be valid.</Text>
+          </Animatable.View>
+        )}
 
-        <Text style={[styles.text_footer, { marginTop: 35 }]}>Password</Text>
+        <Text style={[styles.text_footer, { marginTop: 35 },{color:colors.text}]}>Password</Text>
         <View style={styles.action}>
           <FontAwesome
             name="lock"
-            color="#fff"
+            color={colors.text}
             size={20}
             style={{ paddingBottom: 5 }}
           />
           <TextInput
             placeholder="Your Password"
-            style={styles.textInput}
+            style={[styles.textInput,{color:colors.text}]}
             autoCapitalize="none"
-            placeholderTextColor="#DDDDDD"
+            placeholderTextColor="#787878"
             secureTextEntry={data.secureTextEntry ? true : false}
             onChangeText={(val) => handlePasswordChange(val)}
           />
           <TouchableOpacity onPress={updateSecureTextEntry}>
             {data.secureTextEntry ? (
-              <Feather name="eye-off" color="white" size={20} />
+              <Feather name="eye-off" color={colors.text} size={20} />
             ) : (
-              <Feather name="eye" color="white" size={20} />
+              <Feather name="eye" color={colors.text} size={20} />
             )}
           </TouchableOpacity>
         </View>
+        {data.isValidPassword ? null : (
+          <Animatable.View animation="fadeInLeft" duration={500}>
+            <Text style={styles.errorMsg}>
+              Password must be at least 8 characters long.
+            </Text>
+          </Animatable.View>
+        )}
 
-        <Text style={[styles.text_footer, { marginTop: 35 }]}>Confirm Password</Text>
+        <Text style={[styles.text_footer, { marginTop: 35 },{color:colors.text}]}>
+          Confirm Password
+        </Text>
         <View style={styles.action}>
           <FontAwesome
             name="lock"
-            color="#fff"
+            color={colors.text}
             size={20}
             style={{ paddingBottom: 5 }}
           />
           <TextInput
             placeholder="Confirm Your Password"
-            style={styles.textInput}
+            style={[styles.textInput, {color:colors.text}]}
             autoCapitalize="none"
-            placeholderTextColor="#DDDDDD"
+            placeholderTextColor="#787878"
             secureTextEntry={data.confirm_secureTextEntry ? true : false}
             onChangeText={(val) => handleConfirmPasswordChange(val)}
+            onEndEditing={(val) => checkPassMatch(val)}
           />
           <TouchableOpacity onPress={updateConfirmSecureTextEntry}>
             {data.confirm_secureTextEntry ? (
-              <Feather name="eye-off" color="white" size={20} />
+              <Feather name="eye-off" color={colors.text} size={20} />
             ) : (
-              <Feather name="eye" color="white" size={20} />
+              <Feather name="eye" color={colors.text} size={20} />
             )}
           </TouchableOpacity>
         </View>
+        {data.passMatch ? null : (
+          <Animatable.View animation="fadeInLeft" duration={500}>
+            <Text style={styles.errorMsg}>Passwords must match.</Text>
+          </Animatable.View>
+        )}
+
+        <Animatable.View animation="fadeIn" duration={500}>
+          <Text style={styles.error}>{data.errorMessage}</Text>
+        </Animatable.View>
 
         <View style={styles.button}>
           <TouchableOpacity
             style={styles.signIn}
             onPress={() => {
-              // navigation.navigate('LoadingScreen')
+              registerHandle(data.email, data.password);
             }}
           >
-            <Text style={styles.textSign}>Sign Up</Text>
+            <Text style={[styles.textSign,]}>Sign Up</Text>
           </TouchableOpacity>
         </View>
 
@@ -179,7 +263,9 @@ export function SignUp({ navigation }) {
               navigation.navigate("SignIn");
             }}
           >
-            <Text style={styles.textSignNew}>Already have an account? Sign in here!</Text>
+            <Text style={styles.textSignNew}>
+              Already have an account? Sign in here!
+            </Text>
           </TouchableOpacity>
         </View>
       </Animatable.View>
@@ -190,7 +276,7 @@ export function SignUp({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#08c2f0",
   },
   top: {
     flex: 1,
@@ -202,7 +288,7 @@ const styles = StyleSheet.create({
 
   bottom: {
     flex: 3,
-    backgroundColor: "#f03e08",
+    backgroundColor: "#d9dbde",
     // alignItems: "center",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
@@ -210,12 +296,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   text_header: {
-    color: "black",
+    color: "#fff",
     fontWeight: "bold",
     fontSize: 30,
   },
   text_footer: {
-    color: "#fff",
+    color: "#4f4f4f",
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -229,14 +315,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#fff",
+    borderBottomColor: "#4f4f4f",
     paddingBottom: 5,
   },
   textInput: {
     flex: 1,
     marginTop: Platform.OS === "ios" ? 0 : -12,
     paddingLeft: 10,
-    color: "#fff",
+    color: "#4f4f4f",
   },
   button: {
     alignItems: "center",
@@ -252,8 +338,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 25,
-    borderColor: "#fff",
-    borderWidth: 1,
+    // borderColor: "#4f4f4f",
+    // borderWidth: 1,
+    backgroundColor: "#f03e08",
   },
   signUp: {
     width: "100%",
@@ -272,6 +359,16 @@ const styles = StyleSheet.create({
   textSignNew: {
     fontSize: 15,
     // fontWeight: "bold",
-    color: "#fff",
+    color: "#f03e08",
+  },
+  errorMsg: {
+    color: "red",
+    fontWeight: "bold",
+    paddingTop: 2,
+  },
+  error: {
+    color: "red",
+    paddingTop: 10,
+    fontWeight: "bold",
   },
 });

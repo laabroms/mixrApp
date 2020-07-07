@@ -5,49 +5,54 @@ import {
     View,
     TextInput,
     TouchableOpacity,
-    Alert
+    Alert,
+    String
     
 } from 'react-native';
-
+import { useTheme } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/AntDesign";
 import  Users  from '../model/users';
 import { IconButton } from '../components/IconButton';
 import * as Animatable from 'react-native-animatable';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from "react-native-vector-icons/Feather";
-
+import * as firebase from "firebase";
 import { AuthContext } from '../components/context';
 
 export function SignInScreen({ navigation }) {
     
+  const { colors } = useTheme();
+  const theme = useTheme();
+
     const [data, setData] = React.useState({
         email: '',
         password: '',
         check_textInputChange: false,
         secureTextEntry: true,
         isValidEmail: true,
-        isValidPassword: true
+        isValidPassword: true,
+        errorMessage: '',
     });
     
     const { signIn } = React.useContext(AuthContext);
 
     const textInputChange = (val) => {
-        if (val.length != 0 ) {
-            setData({
-                ...data,
-                email:val,
-                check_textInputChange: true,
-                isValidEmail: true
-            });
-        }
-        else {
-            setData({
-              ...data,
-              email: val,
-              check_textInputChange: false,
-              isValidEmail: false,
-            });
-        }
+         var emailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+         if (emailFormat.test(val)) {
+           setData({
+             ...data,
+             email: val,
+             check_textInputChange: true,
+             isValidEmail: true,
+           });
+         } else {
+           setData({
+             ...data,
+             email: val,
+             check_textInputChange: false,
+             isValidEmail: false,
+           });
+         }
     }
 
     const handlePasswordChange = (val) => {
@@ -74,7 +79,8 @@ export function SignInScreen({ navigation }) {
     }
 
     // const handleValidEmail = (val) => {
-    //     if( val.trim().length >= 4) {
+    //     var emailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    //     if( val.value.match(emailFormat)) {
     //       setData({
     //         ...data,
     //         isValidEmail: true
@@ -88,22 +94,18 @@ export function SignInScreen({ navigation }) {
     // }
     
     const loginHandle = (email, password) => {
-      const foundUser = Users.filter(( item ) => {
-        return email == item.email && password == item.password;
-      });
-      if (data.email.length == 0 || data.password.length == 0 ) {
-        Alert.alert("Wrong Input!", "Email or password field cannot be empty.", [
-          { text: "Okay" }
-        ]);
-        return;
-      } 
-      if ( foundUser.length == 0 ) {
-        Alert.alert('Invalid User!', 'Email or password is incorrect.', [
-          {text: 'Okay'}
-        ]);
-        return;
-      } 
-      signIn(foundUser);
+        firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error){
+          setData({
+            ...data,
+            errorMessage: error.message
+          })
+
+        })
+        signIn(email)
+      
+
+      
+      
     }
 
     return (
@@ -117,7 +119,7 @@ export function SignInScreen({ navigation }) {
             }}
           />
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.text_header}>Welcome to Mixr!</Text>
+            <Text style={[styles.text_header, {color:colors.background}]}>Welcome to Mixr!</Text>
             {/* <Image  
             source={require('../images/logoFullDark.png')}
             style={{width:50, height: 10}}
@@ -125,58 +127,69 @@ export function SignInScreen({ navigation }) {
           </View>
         </View>
 
-        <Animatable.View animation="fadeInUpBig" style={styles.bottom}>
-          <Text style={styles.text_footer}>Email</Text>
+        <Animatable.View
+          animation="fadeInUpBig"
+          style={[styles.bottom, { backgroundColor: colors.background }]}
+        >
+          <Text style={[styles.text_footer, { color: colors.text }]}>
+            Email
+          </Text>
           <View style={styles.action}>
             <FontAwesome
               name="user-o"
-              color="#fff"
+              color={colors.text}
               size={20}
               style={{ paddingBottom: 5 }}
             />
             <TextInput
               placeholder="Your Email"
-              style={styles.textInput}
+              style={[styles.textInput, { color: colors.text }]}
               autoCapitalize="none"
-              placeholderTextColor="#DDDDDD"
+              placeholderTextColor="#787878"
               onChangeText={(val) => textInputChange(val)}
               // onEndEditing={(e)=>handleValidEmail(e.nativeEvent.text)}
             />
             {data.check_textInputChange ? (
               <Animatable.View animation="bounceIn">
-                <Feather name="check-circle" color="white" size={20} />
+                <Feather name="check-circle" color="#1bf723" size={20} />
               </Animatable.View>
             ) : null}
           </View>
           {data.isValidEmail ? null : (
             <Animatable.View animation="fadeInLeft" duration={500}>
-              <Text style={styles.errorMsg}>
-                Email must be valid.
-              </Text>
+              <Text style={styles.errorMsg}>Email must be valid.</Text>
             </Animatable.View>
           )}
 
-          <Text style={[styles.text_footer, { marginTop: 35 }]}>Password</Text>
+          <Text
+            style={[
+              styles.text_footer,
+              { marginTop: 35 },
+              { color: colors.text },
+            ]}
+          >
+            Password
+          </Text>
           <View style={styles.action}>
             <FontAwesome
               name="lock"
-              color="#fff"
+              color={colors.text}
               size={20}
               style={{ paddingBottom: 5 }}
             />
             <TextInput
               placeholder="Your Password"
-              style={styles.textInput}
+              style={[styles.textInput,{color:colors.text}]}
               autoCapitalize="none"
-              placeholderTextColor="#DDDDDD"
+              placeholderTextColor="#787878"
               secureTextEntry={data.secureTextEntry ? true : false}
               onChangeText={(val) => handlePasswordChange(val)}
             />
             <TouchableOpacity onPress={updateSecureTextEntry}>
               {data.secureTextEntry ? (
-                <Feather name="eye-off" color="white" size={20} />
+                <Feather name="eye-off" color={colors.text} size={20} />
               ) : (
-                <Feather name="eye" color="white" size={20} />
+                <Feather name="eye" color={colors.text} size={20} />
               )}
             </TouchableOpacity>
           </View>
@@ -187,7 +200,10 @@ export function SignInScreen({ navigation }) {
               </Text>
             </Animatable.View>
           )}
-          
+
+          <Animatable.View animation="fadeIn" duration={500}>
+            <Text style={styles.error}>{data.errorMessage}</Text>
+          </Animatable.View>
 
           <View style={styles.button}>
             <TouchableOpacity
@@ -196,7 +212,7 @@ export function SignInScreen({ navigation }) {
                 loginHandle(data.email, data.password);
               }}
             >
-              <Text style={styles.textSign}>Sign In</Text>
+              <Text style={[styles.textSign, ]}>Sign In</Text>
             </TouchableOpacity>
           </View>
 
@@ -222,7 +238,7 @@ export function SignInScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#08c2f0",
   },
   top: {
     flex: 1,
@@ -234,7 +250,7 @@ const styles = StyleSheet.create({
 
   bottom: {
     flex: 3,
-    backgroundColor: "#f03e08",
+    backgroundColor: "#d9dbde",
     // alignItems: "center",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
@@ -242,12 +258,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   text_header: {
-    color: "black",
+    color: "#fff",
     fontWeight: "bold",
     fontSize: 30,
   },
   text_footer: {
-    color: "#fff",
+    color: "#4f4f4f",
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -261,14 +277,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#fff",
+    borderBottomColor: "#4f4f4f",
     paddingBottom: 5,
   },
   textInput: {
     flex: 1,
     marginTop: Platform.OS === "ios" ? 0 : -12,
     paddingLeft: 10,
-    color: "#fff",
+    color: "#4f4f4f",
   },
   button: {
     alignItems: "center",
@@ -284,8 +300,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 25,
-    borderColor: "#fff",
-    borderWidth: 1,
+    // borderColor: "#4f4f4f",
+    // borderWidth: 1,
+    backgroundColor: "#f03e08",
   },
   signUp: {
     width: "100%",
@@ -304,11 +321,16 @@ const styles = StyleSheet.create({
   textSignNew: {
     fontSize: 15,
     // fontWeight: "bold",
-    color: "#fff",
+    color: "#f03e08",
   },
   errorMsg: {
-    color:'red',
-    fontWeight:'bold',
-    paddingTop:2
-  }
+    color: "red",
+    fontWeight: "bold",
+    paddingTop: 2,
+  },
+  error: {
+    color: "red",
+    paddingTop: 10,
+    fontWeight: "bold",
+  },
 });
