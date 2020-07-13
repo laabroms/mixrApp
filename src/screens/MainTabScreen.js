@@ -4,10 +4,13 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { HomeScreen } from './HomeScreen';
 import { DetailsScreen, NotificationsScreen } from './NotificationsScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { useTheme } from 'react-native-paper';
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import { ProfileScreen } from './ProfileScreen';
 import { StatusBar } from 'expo-status-bar';
 import { MessagesScreen } from './MessagesScreen';
+import EditProfileScreen from './EditProfileScreen';
 
 const Tab = createMaterialBottomTabNavigator();
 const HomeStack = createStackNavigator();
@@ -16,11 +19,14 @@ const ProfileStack = createStackNavigator();
 const MessagesStack = createStackNavigator();
 
 const MainTabScreen = () => {
+
+  const { colors } = useTheme();
+
     return (
       <Tab.Navigator
         initialRouteName="Home"
         activeColor="#fff"
-        barStyle={{ backgroundColor: "#f03e08" }}
+        barStyle={{ backgroundColor: colors.background }}
       >
         <Tab.Screen
           name="Home"
@@ -33,17 +39,7 @@ const MainTabScreen = () => {
             ),
           }}
         />
-        <Tab.Screen
-          name="Profile"
-          component={ProfileStackScreen}
-          options={{
-            tabBarLabel: "Profile",
-            tabBarColor: "#08f065",
-            tabBarIcon: ({ color }) => (
-              <Icon name="ios-person" color={color} size={26} />
-            ),
-          }}
-        />
+
         <Tab.Screen
           name="Notifications"
           component={NotificationsStackScreen}
@@ -66,6 +62,17 @@ const MainTabScreen = () => {
             ),
           }}
         />
+        <Tab.Screen
+          name="Profile"
+          component={ProfileStackScreen}
+          options={{
+            tabBarLabel: "Profile",
+            tabBarColor: "#08f065",
+            tabBarIcon: ({ color }) => (
+              <Icon name="ios-person" color={color} size={26} />
+            ),
+          }}
+        />
       </Tab.Navigator>
     );
 };
@@ -73,143 +80,188 @@ const MainTabScreen = () => {
 
 export default MainTabScreen;
 
-const HomeStackScreen = ({ navigation }) => (
-  <HomeStack.Navigator
-    screenOptions={{
-      headerStyle: {
-        backgroundColor: "#f03e08",
-      },
-      headerTintColor: "#fff",
-      headerTitleStyle: {
-        fontWeight: "bold",
-      },
-    }}
-  >
-    <HomeStack.Screen
-      name="Home"
-      component={HomeScreen}
-      options={{
-        title: "Home",
-        headerLeft: () => (
-          <Icon.Button
-            name="ios-menu"
-            size={25}
-            backgroundColor="#f03e08"
-            onPress={() => {
-              navigation.openDrawer();
-            }}
-          />
-        ),
+const HomeStackScreen = ({ navigation }) => {
+
+  const { colors } = useTheme();
+  return (
+    <HomeStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.background,
+          shadowColor: colors.background,
+          elevation: 0,
+        },
+        headerTintColor: colors.text,
+        // headerTitleStyle: {
+        //   fontWeight: "bold",
+        // },
       }}
-    />
-  </HomeStack.Navigator>
-);
+    >
+      <HomeStack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          title: "Home",
+          headerLeft: () => (
+            <Icon.Button
+              name="ios-menu"
+              size={25}
+              backgroundColor={colors.background}
+              color={colors.text}
+              onPress={() => {
+                navigation.openDrawer();
+              }}
+            />
+          ),
+        }}
+      />
+    </HomeStack.Navigator>
+  );};
 
 
-const NotificationsStackScreen = ({ navigation }) => (
-  <NotificationsStack.Navigator
-    screenOptions={{
-      headerStyle: {
-        backgroundColor: "#08c2f0",
-      },
-      headerTintColor: "#fff",
-      headerTitleStyle: {
-        fontWeight: "bold",
-      },
-    }}
-  >
-    <NotificationsStack.Screen
-      name="Notifications"
-      component={NotificationsScreen}
-      options={{
-        title: "Notifications",
-        //     <Image
-        //         source = {require('../images/logoFullDark.png')}
-        //         style={{width:'3%',height: 20, margin: '10%'}}
-        // />,
-        headerLeft: () => (
-          <Icon.Button
-            name="ios-menu"
-            size={25}
-            backgroundColor="#08c2f0"
-            onPress={() => {
-              navigation.openDrawer();
-            }}
-          />
-        ),
-      }}
-    />
-  </NotificationsStack.Navigator>
-);
+const NotificationsStackScreen = ({ navigation }) => {
 
-const MessagesStackScreen = ({ navigation }) => (
-  <MessagesStack.Navigator
-    screenOptions={{
-      headerStyle: {
-        backgroundColor: "#f008e8",
-      },
-      headerTintColor: "#fff",
-      headerTitleStyle: {
-        fontWeight: "bold",
-      },
-    }}
-  >
-    <MessagesStack.Screen
-      name="Messages"
-      component={MessagesScreen}
-      options={{
-        title: "Messages",
-        //     <Image
-        //         source = {require('../images/logoFullDark.png')}
-        //         style={{width:'3%',height: 20, margin: '10%'}}
-        // />,
-        headerLeft: () => (
-          <Icon.Button
-            name="ios-menu"
-            size={25}
-            backgroundColor="#f008e8"
-            onPress={() => {
-              navigation.openDrawer();
-            }}
-          />
-        ),
-      }}
-    />
-  </MessagesStack.Navigator>
-);
+  const {colors} = useTheme();
 
-const ProfileStackScreen = ({ navigation }) => (
-  <ProfileStack.Navigator
-    screenOptions={{
-      headerStyle: {
-        backgroundColor: "#08f065",
-      },
-      headerTintColor: "#fff",
-      headerTitleStyle: {
-        fontWeight: "bold",
-      },
-    }}
-  >
-    <ProfileStack.Screen
-      name="Profile"
-      component={ProfileScreen}
-      options={{
-        title: "Profile",
-        //     <Image
-        //         source = {require('../images/logoFullDark.png')}
-        //         style={{width:'3%',height: 20, margin: '10%'}}
-        // />,
-        headerLeft: () => (
-          <Icon.Button
-            name="ios-menu"
-            size={25}
-            backgroundColor="#08f065"
-            onPress={() => {
-              navigation.openDrawer();
-            }}
-          />
-        ),
+  return (
+    <NotificationsStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.background,
+          shadowColor: colors.background,
+          elevation: 0,
+        },
+        headerTintColor: colors.text,
+        // headerTitleStyle: {
+        //   fontWeight: "bold",
+        // },
       }}
-    />
-  </ProfileStack.Navigator>
-);
+    >
+      <NotificationsStack.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+        options={{
+          title: "Notifications",
+          //     <Image
+          //         source = {require('../images/logoFullDark.png')}
+          //         style={{width:'3%',height: 20, margin: '10%'}}
+          // />,
+          headerLeft: () => (
+            <Icon.Button
+              name="ios-menu"
+              size={25}
+              backgroundColor={colors.background}
+              color={colors.text}
+              onPress={() => {
+                navigation.openDrawer();
+              }}
+            />
+          ),
+        }}
+      />
+    </NotificationsStack.Navigator>
+  );};
+
+const MessagesStackScreen = ({ navigation }) => {
+  const {colors} = useTheme();
+
+  return (
+    <MessagesStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.background,
+          shadowColor: colors.background,
+          elevation: 0,
+        },
+        headerTintColor: colors.text,
+        // headerTitleStyle: {
+        //   fontWeight: "bold",
+        // },
+      }}
+    >
+      <MessagesStack.Screen
+        name="Messages"
+        component={MessagesScreen}
+        options={{
+          title: "Messages",
+          //     <Image
+          //         source = {require('../images/logoFullDark.png')}
+          //         style={{width:'3%',height: 20, margin: '10%'}}
+          // />,
+          headerLeft: () => (
+            <Icon.Button
+              name="ios-menu"
+              size={25}
+              backgroundColor={colors.background}
+              color={colors.text}
+              onPress={() => {
+                navigation.openDrawer();
+              }}
+            />
+          ),
+        }}
+      />
+    </MessagesStack.Navigator>
+  );
+    };
+
+const ProfileStackScreen = ({ navigation }) => {
+  
+  const {colors} = useTheme();
+
+  return (
+    <ProfileStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.background,
+          shadowColor: colors.background,
+          elevation: 0
+        },
+        headerTintColor: colors.text,
+        // headerTitleStyle: {
+        //   fontWeight: "bold",
+        // },
+      }}
+    >
+      <ProfileStack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          title: "",
+          //     <Image
+          //         source = {require('../images/logoFullDark.png')}
+          //         style={{width:'3%',height: 20, margin: '10%'}}
+          // />,
+          headerLeft: () => (
+            <Icon.Button
+              name="ios-menu"
+              size={25}
+              backgroundColor= {colors.background}
+              color= {colors.text}
+              onPress={() => {
+                navigation.openDrawer();
+              }}
+            />
+          ),
+          headerRight: () => (
+            <MaterialCommunityIcons.Button
+              name="account-edit"
+              size={25}
+              backgroundColor = {colors.background}
+              color = {colors.text}
+              onPress={() => {
+                navigation.navigate('EditProfile');
+              }}
+            />
+          ),
+        }}
+      />
+      <ProfileStack.Screen 
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{
+          title: 'Edit Profile'
+        }}
+      />
+    </ProfileStack.Navigator>
+)};

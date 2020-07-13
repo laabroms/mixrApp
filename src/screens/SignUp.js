@@ -101,6 +101,10 @@ export function SignUp({ navigation }) {
    };
 
    const checkPassMatch = (val) => {
+     setData({
+       ...data,
+       confirmPassword: val
+     })
     if (data.password !== data.confirmPassword) {
       setData({
         ...data,
@@ -116,17 +120,34 @@ export function SignUp({ navigation }) {
    
 
   const registerHandle = (email, password) => {
-    firebase
-      .auth()
-      .createUserWithEmailAndPassword(email, password)
-      .catch(function (error) {
-        setData({
-          ...data,
-          errorMessage: error.message,
-        });
+    if (data.passMatch == false) {
+      setData({
+        ...data,
+        errorMessage: "Your passwords must match."
       })
+    } 
+    
+    else {
+      firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, password)
+        .catch(function (error) {
+          setData({
+            ...data,
+            errorMessage: error.message,
+          });
+        })
+        .then(function () {
+          firebase
+            .auth()
+            .signInWithEmailAndPassword(email, password)
+            .catch(function (error) {});
+        });
 
-    signUp(email)
+      signUp(email);
+    }
+    
+    
 
 
     
@@ -235,11 +256,11 @@ export function SignUp({ navigation }) {
             )}
           </TouchableOpacity>
         </View>
-        {data.passMatch ? null : (
+        {/* {data.passMatch ? null : (
           <Animatable.View animation="fadeInLeft" duration={500}>
             <Text style={styles.errorMsg}>Passwords must match.</Text>
           </Animatable.View>
-        )}
+        )} */}
 
         <Animatable.View animation="fadeIn" duration={500}>
           <Text style={styles.error}>{data.errorMessage}</Text>

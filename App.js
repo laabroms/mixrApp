@@ -46,7 +46,7 @@ export default function App() {
     colors: {
       ...NavigationDefaultTheme.colors,
       ...PaperDefaultTheme.colors,
-      background: '#e8e8e8',
+      background: '#fff',
       text: '#333333',
     }
   };
@@ -57,7 +57,7 @@ export default function App() {
       ...NavigationDarkTheme.colors,
       ...PaperDarkTheme.colors,
       background: '#333333',
-      text: '#e8e8e8'
+      text: '#fff'
     },
   };
 
@@ -101,7 +101,7 @@ export default function App() {
     }
   };
 
-  const [state, dispatch] = React.useReducer(loginReducer, initialLoginState);
+  const [loginState, dispatch] = React.useReducer(loginReducer, initialLoginState);
 
   const authContext = React.useMemo(() => ({
     signIn: async(email) => {
@@ -118,31 +118,25 @@ export default function App() {
 
     signOut: async() => {
       firebase.auth().signOut();
-      try {
-        await AsyncStorage.removeItem("userToken");
-      } catch (e) {
-        console.log(e);
-      }
+      // try {
+      //   await AsyncStorage.removeItem("userToken");
+      // } catch (e) {
+      //   console.log(e);
+      // }
       dispatch({ type: "LOGOUT"});
     },
 
 
     signUp: async(email) => {
-      try {
-         firebase.auth().onAuthStateChanged(function (user) {
+      firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
-          
           const userToken = firebase.auth().currentUser.uid;
           AsyncStorage.setItem("userToken", userToken);
-          dispatch({ type: "Register", id: email, token: userToken });        
-        } 
+          dispatch({ type: "REGISTER", id: email, token: userToken });
+        }
       });
-      } catch(e) {
-        console.log(e);
-      }
-       
-    
     },
+
     toggleTheme: () => {
       setIsDarkTheme( isDarkTheme => !isDarkTheme);
     },
@@ -166,7 +160,7 @@ export default function App() {
   }, []);
 
 
-  if ( state.isLoading ) {
+  if ( loginState.isLoading ) {
     return (
       <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
         <ActivityIndicator size='large' />
@@ -179,7 +173,7 @@ export default function App() {
     <PaperProvider theme={theme}>
       <AuthContext.Provider value={authContext}>
         <NavigationContainer theme={theme}>
-          {state.userToken !== null ? (
+          {loginState.userToken !== null ? (
             <Drawer.Navigator
               drawerContent={(props) => <DrawerContent {...props} />}
             >
